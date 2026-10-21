@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALI SABER SYSTEM - المنظومة المالية وإدارة الفواتير</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&display=swap');
+        body { font-family: 'Cairo', sans-serif; transition: background-color 0.3s, color 0.3s; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type=number] { -moz-appearance: textfield; }
+    </style>
+</head>
+<body class="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen custom-scrollbar pb-12">
+
+    <!-- 1️⃣ الشريط العلوي -->
+    <header class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 sticky top-0 z-40 px-3 py-2.5 shadow-sm">
+        <div class="max-w-7xl mx-auto flex justify-between items-center gap-2">
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center font-black text-white text-base shadow-lg shadow-blue-500/20" title="شعار المنظومة الرئيسي">AS</div>
+                <div class="hidden sm:block">
+                    <h1 class="font-black text-sm text-slate-900 dark:text-white tracking-wide">ALI SABER SYSTEM</h1>
+                    <p class="text-[9px] text-slate-500 dark:text-slate-400 font-bold">منظومة إدارة الفواتير والعملاء (سحابي)</p>
+                </div>
+            </div>
+
+            <!-- الأزرار العلوية -->
+            <div class="flex items-center gap-1.5">
+                <input type="file" id="restore-backup-file-input" class="hidden" accept=".json" onchange="importSystemBackup(event)">
+                
+                <button onclick="document.getElementById('restore-backup-file-input').click()" title="استعادة نسخة احتياطية" class="w-9 h-9 sm:w-auto sm:px-3 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-amber-400 hover:bg-slate-300 dark:hover:bg-slate-700 transition border border-slate-300 dark:border-slate-700/50 flex items-center justify-center gap-1.5 text-xs font-bold whitespace-nowrap">
+                    <i data-lucide="upload" class="w-4 h-4 shrink-0"></i>
+                    <span class="hidden sm:inline">استعادة بيانات</span>
+                </button>
+
+                <button onclick="ConfirmActionModule.show('exportBackup', 'تصدير نسخة احتياطية', 'هل ترغب في تحميل نسخة احتياطية كاملة من البيانات الحالية وتنزيلها على جهازك؟')" title="تصدير نسخة احتياطية" class="w-9 h-9 sm:w-auto sm:px-3 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-emerald-400 hover:bg-slate-300 dark:hover:bg-slate-700 transition border border-slate-300 dark:border-slate-700/50 flex items-center justify-center gap-1.5 text-xs font-bold whitespace-nowrap">
+                    <i data-lucide="download" class="w-4 h-4 shrink-0"></i>
+                    <span class="hidden sm:inline">نسخة احتياطية</span>
+                </button>
+
+                <button onclick="ConfirmActionModule.show('toggleTheme', 'تغيير المظهر', 'هل تريد التبديل بين الوضع النهاري والوضع الليلي للسيستم؟')" title="التبديل بين الوضع النهاري والليلي" class="w-9 h-9 sm:w-auto sm:px-3 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-amber-400 hover:bg-slate-300 dark:hover:bg-slate-700 transition border border-slate-300 dark:border-slate-700/50 flex items-center justify-center gap-1.5 text-xs font-bold whitespace-nowrap">
+                    <i data-lucide="sun" id="theme-icon-sun" class="w-4 h-4 hidden dark:inline shrink-0"></i>
+                    <i data-lucide="moon" id="theme-icon-moon" class="w-4 h-4 inline dark:hidden text-slate-700 shrink-0"></i>
+                    <span class="hidden sm:inline" id="theme-text">الوضع النهاري</span>
+                </button>
+
+                <button onclick="ConfirmActionModule.show('goDashboard', 'الذهاب للرئيسية', 'الانتقال المباشر إلى لوحة التحكم الرئيسية والمؤشرات المالية.')" title="لوحة التحكم الرئيسية" class="w-9 h-9 sm:w-auto sm:px-3 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700 transition border border-slate-300 dark:border-slate-700/50 flex items-center justify-center gap-1.5 text-xs font-bold whitespace-nowrap">
+                    <i data-lucide="layout-dashboard" class="w-4 h-4 text-blue-500 dark:text-blue-400 shrink-0"></i>
+                    <span class="hidden sm:inline">الرئيسية</span>
+                </button>
+
+                <button onclick="ConfirmActionModule.show('openPayment', 'تسجيل سداد مالي', 'فتح نافذة سداد مالي لتسجيل مبالغ مسددة أو مقدمات للحسابات.')" title="سداد مالي" class="w-9 h-9 sm:w-auto sm:px-3 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700 transition border border-slate-300 dark:border-slate-700/50 flex items-center justify-center gap-1.5 text-xs font-bold whitespace-nowrap">
+                    <i data-lucide="wallet" class="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0"></i>
+                    <span class="hidden sm:inline">سداد مالي</span>
+                </button>
+
+                <button onclick="ConfirmActionModule.show('openClients', 'إدارة العملاء', 'عرض وسجل جميع العملاء المسجلين بالمنظومة للبحث أو التعديل.')" title="إدارة العملاء" class="w-9 h-9 sm:w-auto sm:px-3 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700 transition border border-slate-300 dark:border-slate-700/50 flex items-center justify-center gap-1.5 text-xs font-bold whitespace-nowrap">
+                    <i data-lucide="users" class="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0"></i>
+                    <span class="hidden sm:inline">العملاء</span>
+                </button>
+
+                <button onclick="ConfirmActionModule.show('openCatalog', 'إدارة الكتالوج', 'تصفح وتعديل الأصناف والمنتجات الثابتة والأسعار المسجلة.')" title="إدارة الكتالوج" class="w-9 h-9 sm:w-auto sm:px-3 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700 transition border border-slate-300 dark:border-slate-700/50 flex items-center justify-center gap-1.5 text-xs font-bold whitespace-nowrap">
+                    <i data-lucide="package" class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0"></i>
+                    <span class="hidden sm:inline">الكتالوج</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 mt-6 space-y-6">
+
+        <!-- 2️⃣ قسم الإحصائيات والمؤشرات المالية -->
+        <section id="dashboard-section" class="space-y-4">
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-sm">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h2 class="text-xl font-black text-slate-900 dark:text-white">لوحة التحكم والمؤشرات المالية</h2>
+                        <span class="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-emerald-500/20 flex items-center gap-1">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> متصل بالسحابة (Cloud)
+                        </span>
+                    </div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 font-semibold">تابع إحصائيات الديون والمقدمات وحركة المبيعات اليومية بدقة فائقة.</p>
+                </div>
+                <div class="flex gap-2 w-full md:w-auto">
+                    <button onclick="InvoiceModule.openNewInvoiceWizard()" class="flex-1 md:flex-none bg-blue-600 hover:bg-blue-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-lg shadow-blue-600/20">
+                        <i data-lucide="file-plus" class="w-4 h-4"></i>
+                        <span>فاتورة جديدة</span>
+                    </button>
+                    <button onclick="ClientModule.openAddClientModal()" class="flex-1 md:flex-none bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold px-4 py-2.5 rounded-xl text-xs border border-slate-300 dark:border-slate-700 flex items-center justify-center gap-2 transition">
+                        <i data-lucide="user-plus" class="w-4 h-4 text-emerald-600 dark:text-emerald-400"></i>
+                        <span>عميل جديد</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- كروت المؤشرات المالية -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                <div onclick="DashboardModule.openFilteredClientsModal('debts')" class="bg-white dark:bg-slate-900 border-r-4 border-r-rose-500 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm hover:shadow-md cursor-pointer transition group">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-600 dark:text-rose-400 shrink-0">
+                                <i data-lucide="trending-down" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <span class="text-[11px] font-black text-rose-600 dark:text-rose-400 block tracking-wide">إجمالي الديون (فلوس بره)</span>
+                                <h3 id="total-debts" class="text-xl font-black text-slate-900 dark:text-white mt-0.5">0 ج</h3>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1 text-[11px] font-extrabold text-slate-400 group-hover:text-rose-500 transition shrink-0 bg-slate-50 dark:bg-slate-800/60 px-2.5 py-1.5 rounded-xl">
+                            <span>عرض</span>
+                            <i data-lucide="chevron-left" class="w-3.5 h-3.5"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div onclick="DashboardModule.openFilteredClientsModal('advances')" class="bg-white dark:bg-slate-900 border-r-4 border-r-emerald-500 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm hover:shadow-md cursor-pointer transition group">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
+                                <i data-lucide="wallet" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <span class="text-[11px] font-black text-emerald-600 dark:text-emerald-400 block tracking-wide">إجمالي المقدمات (أرصدة دائنة)</span>
+                                <h3 id="total-advances" class="text-xl font-black text-slate-900 dark:text-white mt-0.5">0 ج</h3>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1 text-[11px] font-extrabold text-slate-400 group-hover:text-emerald-500 transition shrink-0 bg-slate-50 dark:bg-slate-800/60 px-2.5 py-1.5 rounded-xl">
+                            <span>عرض</span>
+                            <i data-lucide="chevron-left" class="w-3.5 h-3.5"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div onclick="ClientModule.openAllClientsModal()" class="bg-white dark:bg-slate-900 border-r-4 border-r-blue-500 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm hover:shadow-md cursor-pointer transition group sm:col-span-2 lg:col-span-1">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
+                                <i data-lucide="users" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <span class="text-[11px] font-black text-blue-600 dark:text-blue-400 block tracking-wide">إجمالي العملاء المسجلين</span>
+                                <h3 id="total-clients-count" class="text-xl font-black text-slate-900 dark:text-white mt-0.5">0 عميل</h3>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1 text-[11px] font-extrabold text-slate-400 group-hover:text-blue-500 transition shrink-0 bg-slate-50 dark:bg-slate-800/60 px-2.5 py-1.5 rounded-xl">
+                            <span>عرض</span>
+                            <i data-lucide="chevron-left" class="w-3.5 h-3.5"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- الرسم البياني الحي -->
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-2xl space-y-3 shadow-sm">
+                <div class="flex justify-between items-center">
+                    <h3 class="font-black text-sm text-slate-900 dark:text-white flex items-center gap-2">
+                        <i data-lucide="bar-chart-3" class="w-4 h-4 text-blue-500 dark:text-blue-400"></i>
+                        <span>مؤشر الشغل اليومي والمبيعات (Chart)</span>
+                    </h3>
+                    <span class="text-[10px] text-slate-500 dark:text-slate-400 font-bold bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-lg">تحديث تلقائي</span>
+                </div>
+                <div class="h-56 relative w-full">
+                    <canvas id="dailyWorkChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3️⃣ قسم البحث وإدارة بطاقة العميل -->
+        <section id="clients-section" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-2xl space-y-4 shadow-sm">
+            <div class="flex flex-col md:flex-row gap-3">
+                <div class="relative flex-1">
+                    <div class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400">
+                        <i data-lucide="search" class="w-4 h-4"></i>
+                    </div>
+                    <input type="text" id="search-client-box" oninput="ClientModule.filterClientsSearch(this.value)" placeholder="ابحث باسم العميل أو رقم الهاتف..." class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 pr-10 pl-4 py-3 rounded-xl text-xs font-bold text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 outline-none focus:border-blue-500 transition">
+                    <div id="clients-dropdown" class="absolute top-full right-0 left-0 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl z-50 max-h-56 overflow-y-auto hidden mt-1 custom-scrollbar"></div>
+                </div>
+
+                <div class="w-full md:w-56">
+                    <select id="filter-region" onchange="ClientModule.applyRegionFilter(this.value)" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 px-3 py-3 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-300 outline-none focus:border-blue-500">
+                        <option value="">كل البلاد / القرى</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- بطاقة العميل النشط -->
+            <div id="active-client-card" class="hidden bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-4 rounded-xl space-y-3">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h3 class="font-black text-slate-900 dark:text-white text-base" id="current-client-name">العميل الحالي</h3>
+                            <span id="client-index-tag" class="text-[10px] bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded font-mono font-bold">#1</span>
+                        </div>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 font-bold mt-1" id="current-client-details">الهاتف والقرية والمديونية</p>
+                    </div>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <button onclick="PaymentModule.openPaymentModal()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-2 rounded-xl text-xs flex items-center gap-1.5 transition shadow-lg shadow-emerald-600/20">
+                            <i data-lucide="banknote" class="w-4 h-4"></i>
+                            <span>سداد مالي</span>
+                        </button>
+                        <button onclick="ClientModule.editCurrentClient()" class="bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/20 font-bold px-3 py-2 rounded-xl text-xs transition flex items-center gap-1">
+                            <i data-lucide="edit" class="w-3.5 h-3.5"></i>
+                            <span>تعديل</span>
+                        </button>
+                        <button onclick="ClientModule.deleteCurrentClient()" class="bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/20 font-bold px-3 py-2 rounded-xl text-xs transition flex items-center gap-1">
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                            <span>حذف</span>
+                        </button>
+                        <button onclick="ClientModule.resetAndClearSelectedClient()" class="bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold px-3 py-2 rounded-xl text-xs transition">
+                            إغلاق
+                        </button>
+                    </div>
+                </div>
+
+                <!-- أرشيف فواتير العميل -->
+                <div class="pt-3 border-t border-slate-200 dark:border-slate-800/80 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full sm:w-auto">
+                        <span class="text-xs font-extrabold text-slate-600 dark:text-slate-300 shrink-0 flex items-center gap-1">
+                            <i data-lucide="folder-archive" class="w-4 h-4 text-blue-500"></i> أرشيف الفواتير:
+                        </span>
+                        <select id="client-invoices-select" onchange="InvoiceModule.switchClientInvoice(this.value)" class="w-full sm:w-64 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white px-3 py-2 rounded-xl text-xs font-bold outline-none shadow-sm focus:border-blue-500 transition">
+                            <option value="">-- الفاتورة الحالية --</option>
+                        </select>
+                    </div>
+                    
+                    <div class="flex items-center gap-2 w-full sm:w-auto">
+                        <button onclick="InvoiceModule.createNewInvoiceForCurrentClient()" class="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-500 text-white font-bold px-3.5 py-2 rounded-xl text-xs transition text-center shadow-md shadow-blue-500/10">
+                            + فاتورة جديدة
+                        </button>
+                        <button onclick="InvoiceModule.deleteCurrentInvoice()" class="bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/20 font-bold px-3 py-2 rounded-xl text-xs transition flex items-center gap-1" title="حذف الفاتورة الحالية">
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                            <span>حذف الفاتورة</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4️⃣ الكتالوج واستدعاء الأصناف المباشر للفاتورة -->
+        <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-2xl space-y-4 shadow-sm">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-3">
+                <div>
+                    <h3 class="font-black text-sm text-slate-900 dark:text-white flex items-center gap-2">
+                        <i data-lucide="boxes" class="w-4.5 h-4.5 text-amber-500"></i>
+                        <span>إدراج الأصناف للفاتورة من الكتالوج</span>
+                    </h3>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 font-semibold mt-0.5">ابحث باسم الصنف أو الكود لإضافته مباشرة لجدول الفاتورة أدناه.</p>
+                </div>
+                <button onclick="CatalogModule.openCatalogModal()" class="w-full sm:w-auto bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/20 px-4 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 shadow-sm">
+                    <i data-lucide="edit-3" class="w-4 h-4"></i>
+                    <span>إدارة الكتالوج وإضافة أصناف جديدة</span>
+                </button>
+            </div>
+
+            <!-- حقل البحث المباشر الرئيسي للإدراج للجدول -->
+            <div class="relative">
+                <div class="relative flex items-center">
+                    <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-blue-500">
+                        <i data-lucide="search" class="w-5 h-5"></i>
+                    </div>
+                    <input type="text" id="item-code-input" oninput="InvoiceModule.searchCatalogItemsForInvoice(this.value)" placeholder="🔍 اكتب اسم الصنف أو الكود هنا لإدراجه فوراً بالفاتورة..." class="w-full bg-slate-50 dark:bg-slate-950 border-2 border-blue-500/30 dark:border-blue-500/20 pr-12 pl-4 py-3.5 rounded-xl text-xs sm:text-sm font-black text-slate-900 dark:text-white outline-none focus:border-blue-500 shadow-sm transition placeholder-slate-400 dark:placeholder-slate-500">
+                </div>
+                <div id="catalog-dropdown" class="absolute top-full right-0 left-0 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl z-50 max-h-56 overflow-y-auto hidden mt-1.5 custom-scrollbar divide-y divide-slate-100 dark:divide-slate-800/60"></div>
+            </div>
+        </section>
+
+        <!-- 5️⃣ تصميم كروت الأصناف المتجاوب مع الموبايل -->
+        <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-2xl space-y-4 shadow-sm">
+            <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-3">
+                <h3 class="font-black text-sm text-slate-900 dark:text-white flex items-center gap-2" id="invoice-header-title">
+                    <i data-lucide="receipt" class="w-4 h-4 text-blue-500 dark:text-blue-400"></i>
+                    <span>بنود الفاتورة الحالية وحركات السداد</span>
+                </h3>
+                <span id="invoice-status-badge" class="px-3 py-1 rounded-full text-xs font-extrabold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700">غير محدد</span>
+            </div>
+
+            <!-- الحاوية الذكية التي تحول الجدول لكروت متجاوبة بالموبايل -->
+            <div id="invoice-items-container" class="space-y-3">
+                <div class="p-6 text-center text-slate-400 dark:text-slate-500 font-bold border border-dashed border-slate-200 dark:border-slate-800 rounded-xl">يرجى اختيار عميل لبدء إدراج بنود الفاتورة.</div>
+            </div>
+
+            <div id="invoice-actions-container" class="hidden bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-200 dark:border-slate-800 space-y-4 text-xs font-bold">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                        <label class="text-slate-500 dark:text-slate-400 block mb-1">الخصم (جنية):</label>
+                        <input type="number" id="invoice-discount" value="0" oninput="InvoiceModule.calculateInvoiceTotals()" class="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 p-2.5 rounded-lg text-rose-600 dark:text-rose-400 font-bold outline-none">
+                    </div>
+                    <div>
+                        <label class="text-slate-500 dark:text-slate-400 block mb-1">حالة الاستلام والتسليم:</label>
+                        <select id="delivery-status" onchange="InvoiceModule.onDeliveryStatusChange()" class="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 p-2.5 rounded-lg font-bold text-slate-900 dark:text-white outline-none">
+                            <option value="delivered">🟢 تم تسليم الشغل للعميل</option>
+                            <option value="pending">🟡 لم يتم التسليم بعد (قيد التنفيذ)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label id="payment-input-label" class="text-slate-500 dark:text-slate-400 block mb-1">مقدم (رصيد دائن):</label>
+                        <input type="number" id="invoice-advance-payment" value="0" oninput="InvoiceModule.calculateInvoiceTotals()" class="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 p-2.5 rounded-lg text-emerald-600 dark:text-emerald-400 font-bold outline-none" placeholder="0">
+                    </div>
+                </div>
+
+                <div class="border-t border-slate-200 dark:border-slate-800 pt-3 flex flex-col sm:flex-row justify-between items-center gap-3">
+                    <div class="flex flex-wrap gap-6 items-center">
+                        <span class="text-slate-500 dark:text-slate-400">إجمالي البنود: <strong id="sub-total" class="text-slate-900 dark:text-white text-sm">0 ج</strong></span>
+                        <span class="text-slate-500 dark:text-slate-400" id="payment-display-label">المقدم المدفوع: <strong id="total-paid-display" class="text-emerald-600 dark:text-emerald-400 text-sm">0 ج</strong></span>
+                        <span class="text-slate-500 dark:text-slate-400">الصافي المتبقي: <strong id="net-total" class="text-rose-600 dark:text-rose-400 text-sm">0 ج</strong></span>
+                    </div>
+                    <button onclick="InvoiceModule.saveCurrentInvoiceToClient()" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-xl font-bold transition shadow-lg shadow-blue-600/20 w-full sm:w-auto">
+                        💾 حفظ الفاتورة وتحديث الحسابات آلياً
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ========================================== -->
+    <!-- 6️⃣ النافذة المنبثقة لشرح الأزرار العلوية -->
+    <!-- ========================================== -->
+    <div id="action-confirm-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-sm border border-slate-200 dark:border-slate-800 p-5 space-y-4 text-center">
+            <div class="w-12 h-12 bg-blue-500/10 text-blue-500 rounded-full flex items-center justify-center mx-auto border border-blue-500/20">
+                <i data-lucide="info" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <h3 id="action-modal-title" class="font-black text-base text-slate-900 dark:text-white">عنوان الزر</h3>
+                <p id="action-modal-desc" class="text-xs text-slate-500 dark:text-slate-400 font-semibold mt-1">شرح التفاصيل الخاصة بالزر المذكور هنا...</p>
+            </div>
+            <div class="flex items-center gap-2 pt-2">
+                <button id="action-modal-confirm-btn" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white py-2.5 rounded-xl text-xs font-bold transition">استمرار</button>
+                <button onclick="ConfirmActionModule.close()" class="flex-1 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 py-2.5 rounded-xl text-xs font-bold transition">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Base -->
+    <script>
+        const ConfirmActionModule = {
+            pendingAction: null,
+            show(actionKey, title, description) {
+                if (window.innerWidth >= 640) {
+                    this.executeAction(actionKey);
+                    return;
+                }
+                
+                this.pendingAction = actionKey;
+                document.getElementById('action-modal-title').innerText = title;
+                document.getElementById('action-modal-desc').innerText = description;
+                document.getElementById('action-confirm-modal').classList.remove('hidden');
+                
+                const btn = document.getElementById('action-modal-confirm-btn');
+                btn.onclick = () => {
+                    const key = this.pendingAction;
+                    this.close();
+                    if (key) this.executeAction(key);
+                };
+            },
+            close() {
+                document.getElementById('action-confirm-modal').classList.add('hidden');
+                this.pendingAction = null;
+            },
+            executeAction(actionKey) {
+                switch(actionKey) {
+                    case 'exportBackup': exportSystemBackup(); break;
+                    case 'toggleTheme': ThemeModule.toggleTheme(); break;
+                    case 'goDashboard': scrollToSection('dashboard-section'); break;
+                    case 'openPayment': PaymentModule.openPaymentModal(); break;
+                    case 'openClients': ClientModule.openAllClientsModal(); break;
+                    case 'openCatalog': CatalogModule.openCatalogModal(); break;
+                }
+            }
+        };
+
+        const StateModule = {
+            catalogItems: [
+                { code: "SL-01", name: "لوح شمسي 580 واط", price: 4500, category: "الطاقة الشمسية والألواح", defaultQty: 1, subCategory: "بدون" },
+                { code: "PC-02", name: "شاشة كمبيوتر 24 بوصة IPS", price: 3800, category: "الكمبيوتر والملحقات", defaultQty: 1, subCategory: "بدون" },
+                { code: "MB-03", name: "هاتف ذكي سامسونج", price: 8500, category: "الهواتف والأجهزة", defaultQty: 1, subCategory: "بدون" }
+            ],
+            clientsList: [
+                { 
+                    name: "محمود محمد نصر", 
+                    phone: "01064225132", 
+                    village: "عزب القصر", 
+                    invoices: [
+                        { id: "INV-1", date: "2026-10-21", items: [{ code: "SL-01", name: "لوح شمسي 580 واط", qty: 2, price: 4500 }], discount: 0, advancePayment: 0, paid: 0, deliveryStatus: "delivered", netTotal: 9000 }
+                    ]
+                }
+            ],
+            currentSelectedClient: null,
+            currentInvoiceIndex: 0,
+            dailyChartInstance: null,
+
+            async initLoad() {
+                const localCat = localStorage.getItem('ali_catalog_items');
+                const localCli = localStorage.getItem('ali_clients_list');
+                if (localCat) this.catalogItems = JSON.parse(localCat);
+                if (localCli) this.clientsList = JSON.parse(localCli);
+            },
+
+            save() {
+                localStorage.setItem('ali_catalog_items', JSON.stringify(this.catalogItems));
+                localStorage.setItem('ali_clients_list', JSON.stringify(this.clientsList));
+            }
+        };
+
+        const ThemeModule = {
+            init() {
+                const savedTheme = localStorage.getItem('ali_theme') || 'dark';
+                if (savedTheme === 'light') {
+                    document.documentElement.classList.remove('dark');
+                    this.updateUI('light');
+                } else {
+                    document.documentElement.classList.add('dark');
+                    this.updateUI('dark');
+                }
+            },
+            toggleTheme() {
+                if (document.documentElement.classList.contains('dark')) {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('ali_theme', 'light');
+                    this.updateUI('light');
+                } else {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('ali_theme', 'dark');
+                    this.updateUI('dark');
+                }
+                if (StateModule.dailyChartInstance) {
+                    ChartModule.updateColors();
+                }
+            },
+            updateUI(theme) {
+                const textEl = document.getElementById('theme-text');
+                if (textEl) {
+                    textEl.innerText = theme === 'light' ? 'الوضع الليلي' : 'الوضع النهاري';
+                }
+            }
+        };
+
+        const ClientModule = {
+            filterClientsSearch(query) {
+                const dropdown = document.getElementById('clients-dropdown');
+                const q = query.trim().toLowerCase();
+
+                if (!q) {
+                    dropdown.classList.add('hidden');
+                    return;
+                }
+
+                const matches = StateModule.clientsList
+                    .map((client, idx) => ({ client, idx }))
+                    .filter(item => item.client.name.toLowerCase().includes(q) || (item.client.phone && item.client.phone.includes(q)));
+                
+                if (matches.length > 0) {
+                    dropdown.innerHTML = matches.map(item => {
+                        const totals = InvoiceModule.calculateClientTotals(item.client);
+                        return `
+                            <div onclick="ClientModule.selectClientByIndex(${item.idx})" class="p-3 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer border-b border-slate-200 dark:border-slate-800/80 last:border-0 flex justify-between items-center text-xs transition">
+                                <span class="font-bold text-slate-800 dark:text-slate-100">👤 ${item.client.name}</span>
+                                <span class="text-slate-500 dark:text-slate-400 font-semibold">${item.client.village || 'بدون قرية'} | ديون: ${totals.debt.toLocaleString()} ج</span>
+                            </div>
+                        `;
+                    }).join('');
+                    dropdown.classList.remove('hidden');
+                } else {
+                    dropdown.innerHTML = `<div class="p-3 text-xs text-slate-400 text-center font-bold">لا يوجد عميل بهذا الاسم. اضغط "+ عميل جديد" للإضافة.</div>`;
+                    dropdown.classList.remove('hidden');
+                }
+            },
+
+            selectClientByIndex(clientIndex) {
+                this.resetAndClearSelectedClient(false);
+
+                StateModule.currentSelectedClient = StateModule.clientsList[clientIndex];
+                if (!StateModule.currentSelectedClient) return;
+
+                if (!StateModule.currentSelectedClient.invoices || StateModule.currentSelectedClient.invoices.length === 0) {
+                    StateModule.currentSelectedClient.invoices = [{ id: "INV-1", date: new Date().toISOString().split('T')[0], items: [], discount: 0, advancePayment: 0, paid: 0, deliveryStatus: "delivered" }];
+                }
+
+                StateModule.currentInvoiceIndex = StateModule.currentSelectedClient.invoices.length - 1;
+
+                const dropdown = document.getElementById('clients-dropdown');
+                if (dropdown) dropdown.classList.add('hidden');
+                
+                const searchBox = document.getElementById('search-client-box');
+                if (searchBox) searchBox.value = StateModule.currentSelectedClient.name;
+                
+                const actionsContainer = document.getElementById('invoice-actions-container');
+                if (actionsContainer) actionsContainer.classList.remove('hidden');
+
+                this.renderCardInfo(clientIndex);
+                InvoiceModule.renderClientInvoicesDropdown();
+                InvoiceModule.loadCurrentInvoiceData();
+                scrollToSection('clients-section');
+            },
+
+            resetAndClearSelectedClient(clearSearchBox = true) {
+                StateModule.currentSelectedClient = null;
+                StateModule.currentInvoiceIndex = 0;
+
+                if (clearSearchBox) {
+                    const searchBox = document.getElementById('search-client-box');
+                    if (searchBox) searchBox.value = "";
+                }
+
+                const clientCard = document.getElementById('active-client-card');
+                if (clientCard) clientCard.classList.add('hidden');
+
+                const actionsContainer = document.getElementById('invoice-actions-container');
+                if (actionsContainer) actionsContainer.classList.add('hidden');
+
+                document.getElementById('invoice-items-container').innerHTML = `<div class="p-6 text-center text-slate-400 dark:text-slate-500 font-bold border border-dashed border-slate-200 dark:border-slate-800 rounded-xl">يرجى اختيار عميل لبدء إدراج بنود الفاتورة.</div>`;
+                document.getElementById('sub-total').innerText = "0 ج";
+                document.getElementById('total-paid-display').innerText = "0 ج";
+                document.getElementById('net-total').innerText = "0 ج";
+                document.getElementById('invoice-discount').value = "0";
+                document.getElementById('invoice-advance-payment').value = "0";
+                document.getElementById('invoice-status-badge').innerText = "غير محدد";
+                document.getElementById('invoice-status-badge').className = "px-3 py-1 rounded-full text-xs font-extrabold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700";
+            },
+
+            renderCardInfo(clientIndex) {
+                if (!StateModule.currentSelectedClient) return;
+                const totals = InvoiceModule.calculateClientTotals(StateModule.currentSelectedClient);
+                
+                document.getElementById('current-client-name').innerText = StateModule.currentSelectedClient.name;
+                document.getElementById('client-index-tag').innerText = `#${clientIndex + 1}`;
+                document.getElementById('current-client-details').innerText = `الهاتف: ${StateModule.currentSelectedClient.phone || 'لا يوجد'} | القرية: ${StateModule.currentSelectedClient.village || 'غير محددة'} | المديونية: ${totals.debt.toLocaleString()} ج | المقدمات: ${totals.advance.toLocaleString()} ج`;
+                document.getElementById('active-client-card').classList.remove('hidden');
+            },
+
+            populateRegionFilter() {
+                const select = document.getElementById('filter-region');
+                const regions = [...new Set(StateModule.clientsList.map(c => c.village).filter(Boolean))];
+                select.innerHTML = `<option value="">كل البلاد / القرى</option>` + regions.map(r => `<option value="${r}">${r}</option>`).join('');
+            },
+
+            applyRegionFilter(region) {
+                if (!region) {
+                    this.filterClientsSearch("");
+                    return;
+                }
+                const filtered = StateModule.clientsList
+                    .map((client, idx) => ({ client, idx }))
+                    .filter(item => item.client.village === region);
+
+                const dropdown = document.getElementById('clients-dropdown');
+                dropdown.innerHTML = filtered.map(item => `
+                    <div onclick="ClientModule.selectClientByIndex(${item.idx})" class="p-3 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer border-b border-slate-200 dark:border-slate-800 text-xs flex justify-between text-slate-900 dark:text-white font-bold">
+                        <span>${item.client.name}</span>
+                        <span class="text-slate-500 dark:text-slate-400">${item.client.phone}</span>
+                    </div>
+                `).join('');
+                dropdown.classList.remove('hidden');
+            },
+
+            openAddClientModal() {
+                const name = prompt("أدخل اسم العميل الجديد:");
+                if (!name) return -1;
+                const phone = prompt("أدخل رقم الهاتف:", "") || "";
+                const village = prompt("أدخل البلد / القرية:", "") || "";
+
+                const newClient = {
+                    name,
+                    phone,
+                    village,
+                    invoices: [{ id: "INV-1", date: new Date().toISOString().split('T')[0], items: [], discount: 0, advancePayment: 0, paid: 0, deliveryStatus: "delivered" }]
+                };
+
+                StateModule.clientsList.push(newClient);
+                StateModule.save();
+                this.populateRegionFilter();
+                DashboardModule.updateFinancialDashboard();
+                const newIdx = StateModule.clientsList.length - 1;
+                this.selectClientByIndex(newIdx);
+                alert(`تم إضافة العميل (${name}) بنجاح!`);
+                return newIdx;
+            },
+
+            editCurrentClient() {
+                if (!StateModule.currentSelectedClient) return;
+                const idx = StateModule.clientsList.indexOf(StateModule.currentSelectedClient);
+                if (idx >= 0) {
+                    const client = StateModule.clientsList[idx];
+                    const name = prompt("تعديل اسم العميل:", client.name);
+                    if (name === null) return;
+                    client.name = name.trim() || client.name;
+                    client.phone = prompt("تعديل رقم الهاتف:", client.phone || "") || "";
+                    client.village = prompt("تعديل البلد / القرية:", client.village || "") || "";
+
+                    StateModule.save();
+                    DashboardModule.updateFinancialDashboard();
+                    this.populateRegionFilter();
+                    this.renderCardInfo(idx);
+                }
+            },
+
+            deleteCurrentClient() {
+                if (!StateModule.currentSelectedClient) return;
+                const idx = StateModule.clientsList.indexOf(StateModule.currentSelectedClient);
+                if (idx >= 0 && confirm(`هل أنت متأكد من حذف العميل (${StateModule.currentSelectedClient.name})؟`)) {
+                    StateModule.clientsList.splice(idx, 1);
+                    StateModule.save();
+                    this.resetAndClearSelectedClient();
+                    DashboardModule.updateFinancialDashboard();
+                    this.populateRegionFilter();
+                }
+            },
+
+            openAllClientsModal() {
+                let modal = document.getElementById('all-clients-manager-modal');
+                if (modal) modal.remove();
+
+                modal = document.createElement('div');
+                modal.id = 'all-clients-manager-modal';
+                modal.className = 'fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4';
+                
+                modal.innerHTML = `
+                    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden border border-slate-200 dark:border-slate-800 flex flex-col max-h-[90vh]">
+                        <div class="bg-slate-50 dark:bg-slate-950 p-4 flex justify-between items-center border-b border-slate-200 dark:border-slate-800 shrink-0">
+                            <h3 class="font-black text-sm text-slate-900 dark:text-white flex items-center gap-2">👥 إدارة وتصفح جميع العملاء (${StateModule.clientsList.length})</h3>
+                            <button onclick="document.getElementById('all-clients-manager-modal').remove()" class="text-rose-500 font-black text-lg px-2">✕</button>
+                        </div>
+                        <div class="p-4 overflow-y-auto space-y-2 flex-1 bg-slate-50 dark:bg-slate-950 custom-scrollbar" id="all-clients-modal-list"></div>
+                        <div class="bg-slate-50 dark:bg-slate-950 p-3 border-t border-slate-200 dark:border-slate-800 flex justify-between items-center shrink-0">
+                            <button onclick="document.getElementById('all-clients-manager-modal').remove()" class="bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-white px-5 py-2 rounded-xl text-xs font-bold">إغلاق</button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+                this.renderAllClientsList("");
+            },
+
+            renderAllClientsList(query) {
+                const container = document.getElementById('all-clients-modal-list');
+                if (!container) return;
+
+                container.innerHTML = StateModule.clientsList.map((client, idx) => {
+                    const totals = InvoiceModule.calculateClientTotals(client);
+                    return `
+                        <div class="bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 flex justify-between items-center text-xs shadow-sm">
+                            <div class="cursor-pointer flex-1" onclick="ClientModule.selectClientByIndex(${idx}); document.getElementById('all-clients-manager-modal').remove();">
+                                <h4 class="font-black text-slate-900 dark:text-white text-sm">👤 ${client.name}</h4>
+                                <p class="text-[11px] text-slate-500 dark:text-slate-400 font-semibold mt-0.5">الهاتف: ${client.phone || 'غير مسجل'} | القرية: ${client.village || 'غير محددة'}</p>
+                            </div>
+                            <div class="text-left font-extrabold">
+                                <span class="text-rose-600 dark:text-rose-400 block">ديون: ${totals.debt.toLocaleString()} ج</span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        };
+
+        const InvoiceModule = {
+            openNewInvoiceWizard() {
+                if (!StateModule.currentSelectedClient) {
+                    alert("يرجى اختيار العميل أولاً لفتح فاتورة جديدة له.");
+                    return;
+                }
+                this.createNewInvoiceForCurrentClient();
+            },
+
+            renderClientInvoicesDropdown() {
+                const select = document.getElementById('client-invoices-select');
+                if (!StateModule.currentSelectedClient || !select) return;
+
+                select.innerHTML = StateModule.currentSelectedClient.invoices.map((inv, idx) => `
+                    <option value="${idx}" ${idx === StateModule.currentInvoiceIndex ? 'selected' : ''}>
+                        فاتورة #${idx + 1} (${inv.date || 'بدون تاريخ'}) - الصافي: ${(inv.netTotal || 0).toLocaleString()} ج
+                    </option>
+                `).join('');
+            },
+
+            switchClientInvoice(index) {
+                StateModule.currentInvoiceIndex = parseInt(index) || 0;
+                this.loadCurrentInvoiceData();
+            },
+
+            createNewInvoiceForCurrentClient() {
+                if (!StateModule.currentSelectedClient) return;
+
+                const newInv = {
+                    id: `INV-${StateModule.currentSelectedClient.invoices.length + 1}`,
+                    date: new Date().toISOString().split('T')[0],
+                    items: [],
+                    discount: 0,
+                    advancePayment: 0,
+                    paid: 0,
+                    deliveryStatus: "delivered",
+                    netTotal: 0
+                };
+
+                StateModule.currentSelectedClient.invoices.push(newInv);
+                StateModule.currentInvoiceIndex = StateModule.currentSelectedClient.invoices.length - 1;
+                
+                this.renderClientInvoicesDropdown();
+                this.loadCurrentInvoiceData();
+                alert("تم فتح فاتورة جديدة للعميل!");
+            },
+
+            deleteCurrentInvoice() {
+                if (!StateModule.currentSelectedClient) return;
+                
+                if (StateModule.currentSelectedClient.invoices.length <= 1) {
+                    alert("لا يمكن حذف الفاتورة الوحيدة للعميل!");
+                    return;
+                }
+
+                if (confirm(`هل أنت متأكد من حذف الفاتورة الحالية رقم #${StateModule.currentInvoiceIndex + 1}؟`)) {
+                    StateModule.currentSelectedClient.invoices.splice(StateModule.currentInvoiceIndex, 1);
+                    StateModule.currentInvoiceIndex = Math.max(0, StateModule.currentSelectedClient.invoices.length - 1);
+                    
+                    StateModule.save();
+                    DashboardModule.updateFinancialDashboard();
+                    this.renderClientInvoicesDropdown();
+                    this.loadCurrentInvoiceData();
+                    ClientModule.renderCardInfo(StateModule.clientsList.indexOf(StateModule.currentSelectedClient));
+                }
+            },
+
+            loadCurrentInvoiceData() {
+                if (!StateModule.currentSelectedClient || !StateModule.currentSelectedClient.invoices[StateModule.currentInvoiceIndex]) return;
+
+                const inv = StateModule.currentSelectedClient.invoices[StateModule.currentInvoiceIndex];
+                document.getElementById('invoice-header-title').innerText = `بنود الفاتورة رقم #${StateModule.currentInvoiceIndex + 1} (${inv.date})`;
+                document.getElementById('invoice-discount').value = inv.discount || 0;
+                document.getElementById('invoice-advance-payment').value = inv.advancePayment || 0;
+                document.getElementById('delivery-status').value = inv.deliveryStatus || "delivered";
+
+                this.onDeliveryStatusChange();
+                this.renderInvoiceTable();
+            },
+
+            onDeliveryStatusChange() {
+                const status = document.getElementById('delivery-status').value;
+                const label = document.getElementById('payment-input-label');
+                const displayLabel = document.getElementById('payment-display-label');
+
+                if (status === 'delivered') {
+                    label.innerText = "سداد (من الحساب):";
+                    displayLabel.innerHTML = `المبلغ المسدد: <strong id="total-paid-display" class="text-emerald-600 dark:text-emerald-400 text-sm">0 ج</strong>`;
+                } else {
+                    label.innerText = "مقدم (رصيد دائن):";
+                    displayLabel.innerHTML = `المقدم المدفوع: <strong id="total-paid-display" class="text-emerald-600 dark:text-emerald-400 text-sm">0 ج</strong>`;
+                }
+                this.calculateInvoiceTotals();
+            },
+
+            calculateInvoiceTotals() {
+                if (!StateModule.currentSelectedClient || !StateModule.currentSelectedClient.invoices[StateModule.currentInvoiceIndex]) return;
+
+                const inv = StateModule.currentSelectedClient.invoices[StateModule.currentInvoiceIndex];
+                let subTotal = 0;
+                
+                if (inv.items) {
+                    inv.items.forEach(i => {
+                        if (!i.isPayment) subTotal += (i.qty * i.price);
+                    });
+                }
+
+                const discount = parseFloat(document.getElementById('invoice-discount').value) || 0;
+                const advancePayment = parseFloat(document.getElementById('invoice-advance-payment').value) || 0;
+                const isDelivered = document.getElementById('delivery-status').value === 'delivered';
+                const netTotal = Math.max(0, subTotal - discount);
+
+                inv.discount = discount;
+                inv.advancePayment = advancePayment;
+                inv.paid = advancePayment;
+                inv.deliveryStatus = document.getElementById('delivery-status').value;
+                inv.netTotal = netTotal;
+
+                document.getElementById('sub-total').innerText = `${subTotal.toLocaleString()} ج`;
+                document.getElementById('total-paid-display').innerText = `${advancePayment.toLocaleString()} ج`;
+                
+                const remainingDue = Math.max(0, netTotal - advancePayment);
+                document.getElementById('net-total').innerText = `${remainingDue.toLocaleString()} ج`;
+
+                const badge = document.getElementById('invoice-status-badge');
+                if (isDelivered) {
+                    if (advancePayment < netTotal) {
+                        badge.innerText = `🔴 تم التسليم - مديونية (متبقي: ${remainingDue.toLocaleString()} ج)`;
+                        badge.className = "px-3 py-1 rounded-full text-xs font-extrabold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20";
+                    } else {
+                        badge.innerText = `🟢 تم التسليم - سدد بالكامل`;
+                        badge.className = "px-3 py-1 rounded-full text-xs font-extrabold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20";
+                    }
+                } else {
+                    badge.innerText = `🟡 لم يتم التسليم - مقدم معلق (${advancePayment.toLocaleString()} ج)`;
+                    badge.className = "px-3 py-1 rounded-full text-xs font-extrabold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20";
+                }
+            },
+
+            calculateClientTotals(client) {
+                let totalDebt = 0;
+                let totalAdvance = 0;
+
+                if (client.invoices) {
+                    client.invoices.forEach(inv => {
+                        let sub = 0;
+                        if (inv.items) {
+                            inv.items.forEach(i => {
+                                if (!i.isPayment) sub += (i.qty * i.price);
+                            });
+                        }
+                        const net = Math.max(0, sub - (inv.discount || 0));
+                        const paid = inv.advancePayment || 0;
+
+                        if (inv.deliveryStatus === 'delivered') {
+                            if (paid < net) totalDebt += (net - paid);
+                            else if (paid > net) totalAdvance += (paid - net);
+                        } else {
+                            totalAdvance += paid;
+                        }
+                    });
+                }
+
+                return { debt: totalDebt, advance: totalAdvance };
+            },
+
+            saveCurrentInvoiceToClient() {
+                if (!StateModule.currentSelectedClient) return;
+
+                this.calculateInvoiceTotals();
+                StateModule.save();
+                
+                DashboardModule.updateFinancialDashboard();
+                this.renderClientInvoicesDropdown();
+                ClientModule.renderCardInfo(StateModule.clientsList.indexOf(StateModule.currentSelectedClient));
+                
+                alert(`تم حفظ فاتورة العميل (${StateModule.currentSelectedClient.name}) بنجاح!`);
+            },
+
+            // ✨ عرض البنود بنظام كروت الموبايل الراسية المتجاوبة تماماً ✨
+            renderInvoiceTable() {
+                const container = document.getElementById('invoice-items-container');
+                if (!StateModule.currentSelectedClient || !StateModule.currentSelectedClient.invoices[StateModule.currentInvoiceIndex]) return;
+
+                const items = StateModule.currentSelectedClient.invoices[StateModule.currentInvoiceIndex].items || [];
+
+                if (items.length === 0) {
+                    container.innerHTML = `<div class="p-6 text-center text-slate-400 dark:text-slate-500 font-bold border border-dashed border-slate-200 dark:border-slate-800 rounded-xl">لم يتم إضافة أصناف للفاتورة بعد. اكتب اسم الصنف أو الكود بالأعلى لإدراجه.</div>`;
+                    this.calculateInvoiceTotals();
+                    return;
+                }
+
+                container.innerHTML = items.map((item, idx) => `
+                    <div class="bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-200 dark:border-slate-800 space-y-3 relative transition hover:border-blue-500/50">
+                        <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-800/80 pb-2">
+                            <span class="text-xs font-black text-purple-600 dark:text-purple-400">بند #${idx + 1}</span>
+                            <button onclick="InvoiceModule.removeInvoiceItem(${idx})" class="text-rose-500 hover:text-rose-400 font-extrabold text-xs flex items-center gap-1">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> حذف
+                            </button>
+                        </div>
+                        <div>
+                            <input type="text" value="${item.name}" onchange="InvoiceModule.updateItemName(${idx}, this.value)" class="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 p-2.5 rounded-xl font-black text-slate-900 dark:text-white text-xs outline-none focus:border-blue-500">
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 text-xs font-bold">
+                            <div>
+                                <label class="text-slate-400 block text-[10px] mb-1">الكمية:</label>
+                                <input type="number" value="${item.qty}" oninput="InvoiceModule.updateItemQty(${idx}, this.value)" class="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 p-2 rounded-xl text-center text-slate-900 dark:text-white font-bold outline-none">
+                            </div>
+                            <div>
+                                <label class="text-slate-400 block text-[10px] mb-1">السعر:</label>
+                                <input type="number" value="${item.price}" oninput="InvoiceModule.updateItemPrice(${idx}, this.value)" class="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 p-2 rounded-xl text-center text-emerald-600 dark:text-emerald-400 font-bold outline-none">
+                            </div>
+                        </div>
+                        <div class="pt-1 flex justify-between items-center border-t border-slate-200 dark:border-slate-800/60 text-xs font-black">
+                            <span class="text-slate-500 dark:text-slate-400">الإجمالي:</span>
+                            <span class="text-emerald-600 dark:text-emerald-400 text-sm">${(item.qty * item.price).toLocaleString()} جنية</span>
+                        </div>
+                    </div>
+                `).join('');
+
+                lucide.createIcons();
+                this.calculateInvoiceTotals();
+            },
+
+            updateItemName(idx, val) {
+                if (!StateModule.currentSelectedClient || !StateModule.currentSelectedClient.invoices[StateModule.currentInvoiceIndex]) return;
+                StateModule.currentSelectedClient.invoices[StateModule.currentInvoiceIndex].items[idx].name = val;
+            },
+
+            updateItemQty(idx, val) {
+                if (!StateModule.currentSelectedClient || !StateModule.currentSelectedClient.invoices[StateModule.currentInvoiceIndex]) return;
+                StateModule.currentSelectedClient.invoices[StateModule.currentInvoiceIndex].items[idx].qty = parseFloat(val) || 1;
+                this.calculateInvoiceTotals();
+            },
+
+            updateItemPrice(idx, val) {
+                if (!StateModule.currentSelectedClient || !StateModule.currentSelectedClient.invoices[StateModule.currentInvoiceIndex]) return;
+                StateModule.currentSelectedClient.invoices[StateModule.currentInvoiceIndex].items[idx].price = parseFloat(val) || 0;
+                this.calculateInvoiceTotals();
+            },
+
+            removeInvoiceItem(idx) {
+                if (!StateModule.currentSelectedClient || !StateModule.currentSelectedClient.invoices[StateModule.currentInvoiceIndex]) return;
+                StateModule.currentSelectedClient.invoices[StateModule.currentInvoiceIndex].items.splice(idx, 1);
+                this.renderInvoiceTable();
+            },
+
+            searchCatalogItemsForInvoice(query) {
+                const dropdown = document.getElementById('catalog-dropdown');
+                const q = query.trim().toLowerCase();
+
+                if (!q) {
+                    dropdown.classList.add('hidden');
+                    return;
+                }
+
+                const matches = StateModule.catalogItems.filter(i => i.name.toLowerCase().includes(q) || (i.code && i.code.toLowerCase().includes(q)));
+                if (matches.length > 0) {
+                    dropdown.innerHTML = matches.map(m => `
+                        <div onclick="InvoiceModule.addCatalogItemToInvoice('${m.name}')" class="p-3.5 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer border-b border-slate-200 dark:border-slate-800 text-xs flex justify-between items-center font-bold text-slate-900 dark:text-white transition">
+                            <div class="flex items-center gap-2">
+                                <span class="bg-blue-500/10 text-blue-500 px-2 py-0.5 rounded text-[10px] font-mono">[${m.code || 'بدون كود'}]</span>
+                                <span>${m.name}</span>
+                            </div>
+                            <span class="text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg">${m.price.toLocaleString()} ج</span>
+                        </div>
+                    `).join('');
+                    dropdown.classList.remove('hidden');
+                } else {
+                    dropdown.innerHTML = `<div class="p-3 text-xs text-slate-400 text-center font-bold">لا يوجد صنف بهذا الاسم في الكتالوج. اضغط "إدارة الكتالوج" لإضافته.</div>`;
+                    dropdown.classList.remove('hidden');
+                }
+            },
+
+            addCatalogItemToInvoice(itemName) {
+                if (!StateModule.currentSelectedClient) {
+                    alert("يرجى اختيار عميل أولاً من الأعلى لإضافة الأصناف لفاتورته!");
+                    return;
+                }
+
+                const item = StateModule.catalogItems.find(i => i.name === itemName);
+                if (!item) return;
+
+                if (!StateModule.currentSelectedClient.invoices[StateModule.currentInvoiceIndex].items) {
+                    StateModule.currentSelectedClient.invoices[StateModule.currentInvoiceIndex].items = [];
+                }
+
+                StateModule.currentSelectedClient.invoices[StateModule.currentInvoiceIndex].items.push({
+                    code: item.code || '',
+                    name: item.name,
+                    qty: item.defaultQty || 1,
+                    price: item.price,
+                    isPayment: false
+                });
+
+                document.getElementById('catalog-dropdown').classList.add('hidden');
+                document.getElementById('item-code-input').value = "";
+                this.renderInvoiceTable();
+            }
+        };
+
+        const PaymentModule = {
+            openPaymentModal() {
+                let modal = document.getElementById('payment-manager-modal');
+                if (modal) modal.remove();
+
+                modal = document.createElement('div');
+                modal.id = 'payment-manager-modal';
+                modal.className = 'fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4';
+                
+                let selectedClientIdx = StateModule.currentSelectedClient ? StateModule.clientsList.indexOf(StateModule.currentSelectedClient) : -1;
+
+                modal.innerHTML = `
+                    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden border border-slate-200 dark:border-slate-800 flex flex-col">
+                        <div class="bg-slate-50 dark:bg-slate-950 p-4 flex justify-between items-center border-b border-slate-200 dark:border-slate-800">
+                            <h3 class="font-black text-sm text-slate-900 dark:text-white flex items-center gap-2">💵 تسجيل سداد مالي</h3>
+                            <button onclick="document.getElementById('payment-manager-modal').remove()" class="text-rose-500 font-black text-lg px-2">✕</button>
+                        </div>
+                        
+                        <div class="p-5 space-y-4">
+                            <div>
+                                <label class="text-xs font-bold text-slate-500 dark:text-slate-400 block mb-1">المبلغ المراد سداده (جنية):</label>
+                                <input type="number" id="pay-modal-amount" placeholder="أدخل المبلغ..." class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 p-3 rounded-xl text-sm font-black text-emerald-600 dark:text-emerald-400 outline-none">
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-50 dark:bg-slate-950 p-3 border-t border-slate-200 dark:border-slate-800 flex justify-between items-center">
+                            <button onclick="PaymentModule.executePaymentFromModal(${selectedClientIdx})" class="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2.5 rounded-xl text-xs font-bold transition">تأكيد السداد</button>
+                            <button onclick="document.getElementById('payment-manager-modal').remove()" class="bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-white px-5 py-2.5 rounded-xl text-xs font-bold">إلغاء</button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            },
+
+            executePaymentFromModal(clientIndex) {
+                if (clientIndex < 0 || !StateModule.clientsList[clientIndex]) {
+                    alert("يرجى اختيار العميل أولاً!");
+                    return;
+                }
+
+                const paid = parseFloat(document.getElementById('pay-modal-amount').value) || 0;
+                if (paid <= 0) return;
+
+                const client = StateModule.clientsList[clientIndex];
+                const activeInv = client.invoices[client.invoices.length - 1];
+                activeInv.advancePayment = (activeInv.advancePayment || 0) + paid;
+
+                StateModule.save();
+                ClientModule.selectClientByIndex(clientIndex);
+                DashboardModule.updateFinancialDashboard();
+                
+                document.getElementById('payment-manager-modal').remove();
+                alert(`تم إضافة مبلغ ${paid.toLocaleString()} ج بنجاح!`);
+            }
+        };
+
+        // ✨ إدارة الكتالوج بتصميم الموبايل الكروت الراسية الفاخرة + خيار الحفظ والإغلاق ✨
+        const CatalogModule = {
+            openCatalogModal() {
+                let modal = document.getElementById('catalog-manager-modal');
+                if (!modal) {
+                    modal = document.createElement('div');
+                    modal.id = 'catalog-manager-modal';
+                    modal.className = 'fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4';
+                    modal.innerHTML = `
+                        <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden border border-slate-200 dark:border-slate-800 flex flex-col max-h-[90vh]">
+                            <div class="bg-slate-50 dark:bg-slate-950 p-4 flex justify-between items-center border-b border-slate-200 dark:border-slate-800 shrink-0">
+                                <h3 class="font-black text-sm text-slate-900 dark:text-white flex items-center gap-2">📋 إدارة الكتالوج الموجهة بالبحث الذكي</h3>
+                                <button onclick="document.getElementById('catalog-manager-modal').remove()" class="text-rose-500 font-black text-lg px-2">✕</button>
+                            </div>
+                            
+                            <div class="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 space-y-2 shrink-0">
+                                <input type="text" id="catalog-modal-search" oninput="CatalogModule.renderCatalogModalList(this.value)" placeholder="ابحث باسم المنتج، القسم، أو الملحق الفرعي..." class="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 p-3 rounded-xl text-xs font-bold text-slate-900 dark:text-white outline-none focus:border-blue-500">
+                            </div>
+
+                            <!-- قائمة الكروت المخصصة للموبايل والكمبيوتر بدون أي ازاحة أفيلية -->
+                            <div class="p-4 overflow-y-auto space-y-3 flex-1 bg-slate-50 dark:bg-slate-950 custom-scrollbar" id="catalog-modal-list"></div>
+                            
+                            <!-- شريط الخيارات والزرين المطلوبة للحفظ والإغلاق -->
+                            <div class="bg-slate-50 dark:bg-slate-950 p-3 border-t border-slate-200 dark:border-slate-800 flex justify-between items-center shrink-0 gap-2">
+                                <button onclick="CatalogModule.saveAndCloseModal()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-xl text-xs font-bold transition shadow-lg shadow-emerald-600/20 flex-1 sm:flex-none">
+                                    💾 حفظ التعديل وإغلاق
+                                </button>
+                                <button onclick="document.getElementById('catalog-manager-modal').remove()" class="bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-white px-5 py-2.5 rounded-xl text-xs font-bold flex-1 sm:flex-none">
+                                    إغلاق
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    document.body.appendChild(modal);
+                }
+                this.renderCatalogModalList();
+            },
+
+            renderCatalogModalList(query = "") {
+                const container = document.getElementById('catalog-modal-list');
+                if (!container) return;
+
+                const q = query.trim().toLowerCase();
+                const items = StateModule.catalogItems.filter(i => 
+                    i.name.toLowerCase().includes(q) || 
+                    (i.category && i.category.toLowerCase().includes(q)) || 
+                    (i.subCategory && i.subCategory.toLowerCase().includes(q))
+                );
+
+                if (items.length === 0) {
+                    container.innerHTML = `<div class="text-center text-slate-400 dark:text-slate-500 text-xs py-6 font-bold">لا توجد أصناف مطابقة للبحث.</div>`;
+                    return;
+                }
+
+                container.innerHTML = items.map((item, idx) => `
+                    <div class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 space-y-3 shadow-sm relative">
+                        <div class="flex justify-between items-center">
+                            <input type="text" value="${item.name}" onchange="CatalogModule.updateCatalogItemData(${idx}, 'name', this.value)" class="flex-1 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-2 rounded-xl font-black text-slate-900 dark:text-white text-xs outline-none focus:border-blue-500 ml-2">
+                            <button onclick="CatalogModule.deleteCatalogItemData(${idx})" class="bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> حذف
+                            </button>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-2 text-xs font-bold">
+                            <div>
+                                <label class="text-slate-400 block text-[10px] mb-1">السعر الثابت:</label>
+                                <input type="number" value="${item.price}" onchange="CatalogModule.updateCatalogItemData(${idx}, 'price', this.value)" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-2 rounded-xl font-extrabold text-emerald-600 dark:text-emerald-400 text-center outline-none">
+                            </div>
+                            <div>
+                                <label class="text-slate-400 block text-[10px] mb-1">الكمية الافتراضية:</label>
+                                <input type="number" value="${item.defaultQty || 1}" onchange="CatalogModule.updateCatalogItemData(${idx}, 'defaultQty', this.value)" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-2 rounded-xl font-bold text-slate-900 dark:text-white text-center outline-none">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2 text-xs font-bold">
+                            <div>
+                                <label class="text-slate-400 block text-[10px] mb-1">القسم:</label>
+                                <input type="text" value="${item.category || ''}" onchange="CatalogModule.updateCatalogItemData(${idx}, 'category', this.value)" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-2 rounded-xl text-slate-800 dark:text-slate-200 font-semibold outline-none" placeholder="القسم">
+                            </div>
+                            <div>
+                                <label class="text-slate-400 block text-[10px] mb-1">ملحق فرعي كـ:</label>
+                                <input type="text" value="${item.subCategory || 'بدون'}" onchange="CatalogModule.updateCatalogItemData(${idx}, 'subCategory', this.value)" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-2 rounded-xl text-slate-800 dark:text-slate-200 font-semibold outline-none" placeholder="بدون">
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+
+                lucide.createIcons();
+            },
+
+            updateCatalogItemData(idx, field, val) {
+                if (field === 'price' || field === 'defaultQty') {
+                    StateModule.catalogItems[idx][field] = parseFloat(val) || 0;
+                } else {
+                    StateModule.catalogItems[idx][field] = val;
+                }
+            },
+
+            deleteCatalogItemData(idx) {
+                if (confirm("هل أنت متأكد من حذف هذا الصنف من الكتالوج؟")) {
+                    StateModule.catalogItems.splice(idx, 1);
+                    this.renderCatalogModalList();
+                }
+            },
+
+            saveAndCloseModal() {
+                StateModule.save();
+                document.getElementById('catalog-manager-modal').remove();
+                alert("تم حفظ جميع تعديلات الكتالوج بنجاح!");
+            }
+        };
+
+        const DashboardModule = {
+            initChart() {
+                const ctx = document.getElementById('dailyWorkChart').getContext('2d');
+                const isDark = document.documentElement.classList.contains('dark');
+                
+                StateModule.dailyChartInstance = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'],
+                        datasets: [{
+                            label: 'إجمالي حركة المبيعات (جنية)',
+                            data: [1200, 3400, 2500, 4800, 6500, 3100, 5200],
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { grid: { color: isDark ? '#1e293b' : '#e2e8f0' }, ticks: { color: isDark ? '#94a3b8' : '#64748b', font: { family: 'Cairo' } } },
+                            y: { grid: { color: isDark ? '#1e293b' : '#e2e8f0' }, ticks: { color: isDark ? '#94a3b8' : '#64748b', font: { family: 'Cairo' } } }
+                        }
+                    }
+                });
+            },
+
+            updateFinancialDashboard() {
+                let globalDebts = 0;
+                let globalAdvances = 0;
+
+                StateModule.clientsList.forEach(c => {
+                    const totals = InvoiceModule.calculateClientTotals(c);
+                    globalDebts += totals.debt;
+                    globalAdvances += totals.advance;
+                });
+
+                document.getElementById('total-debts').innerText = `${globalDebts.toLocaleString()} ج`;
+                document.getElementById('total-advances').innerText = `${globalAdvances.toLocaleString()} ج`;
+                document.getElementById('total-clients-count').innerText = `${StateModule.clientsList.length} عميل`;
+            },
+
+            openFilteredClientsModal(type) {
+                let modal = document.getElementById('filtered-clients-modal');
+                if (modal) modal.remove();
+
+                const isDebt = type === 'debts';
+                const title = isDebt ? '📋 العملاء الذين عليهم ديون' : '💰 العملاء الذين دافعين مقدم';
+                
+                let filteredList = [];
+                StateModule.clientsList.forEach((client, idx) => {
+                    const totals = InvoiceModule.calculateClientTotals(client);
+                    if (isDebt && totals.debt > 0) {
+                        filteredList.push({ client, idx, amount: totals.debt });
+                    } else if (!isDebt && totals.advance > 0) {
+                        filteredList.push({ client, idx, amount: totals.advance });
+                    }
+                });
+
+                modal = document.createElement('div');
+                modal.id = 'filtered-clients-modal';
+                modal.className = 'fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4';
+                
+                modal.innerHTML = `
+                    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden border border-slate-200 dark:border-slate-800 flex flex-col max-h-[90vh]">
+                        <div class="bg-slate-50 dark:bg-slate-950 p-4 flex justify-between items-center border-b border-slate-200 dark:border-slate-800 shrink-0">
+                            <h3 class="font-black text-xs sm:text-sm text-slate-900 dark:text-white flex items-center gap-2">${title}</h3>
+                            <button onclick="document.getElementById('filtered-clients-modal').remove()" class="text-rose-500 font-black text-lg px-2">✕</button>
+                        </div>
+                        <div class="p-4 overflow-y-auto space-y-2 flex-1 bg-slate-50 dark:bg-slate-950 custom-scrollbar">
+                            ${filteredList.map(item => `
+                                <div onclick="ClientModule.selectClientByIndex(${item.idx}); document.getElementById('filtered-clients-modal').remove();" class="bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 flex justify-between items-center cursor-pointer hover:border-blue-500 transition text-xs shadow-sm">
+                                    <div>
+                                        <h4 class="font-black text-slate-900 dark:text-white text-sm">👤 ${item.client.name}</h4>
+                                        <p class="text-[11px] text-slate-500 dark:text-slate-400 font-semibold mt-0.5">${item.client.village || 'غير محددة'}</p>
+                                    </div>
+                                    <span class="font-extrabold ${isDebt ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'} text-sm">${item.amount.toLocaleString()} ج</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="bg-slate-50 dark:bg-slate-950 p-3 border-t border-slate-200 dark:border-slate-800 flex justify-end shrink-0">
+                            <button onclick="document.getElementById('filtered-clients-modal').remove()" class="bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-white px-5 py-2 rounded-xl text-xs font-bold">إغلاق</button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            }
+        };
+
+        const ChartModule = {
+            updateColors() {
+                if (!StateModule.dailyChartInstance) return;
+                const isDark = document.documentElement.classList.contains('dark');
+                StateModule.dailyChartInstance.options.scales.x.grid.color = isDark ? '#1e293b' : '#e2e8f0';
+                StateModule.dailyChartInstance.options.scales.x.ticks.color = isDark ? '#94a3b8' : '#64748b';
+                StateModule.dailyChartInstance.options.scales.y.grid.color = isDark ? '#1e293b' : '#e2e8f0';
+                StateModule.dailyChartInstance.options.scales.y.ticks.color = isDark ? '#94a3b8' : '#64748b';
+                StateModule.dailyChartInstance.update();
+            }
+        };
+
+        function scrollToSection(id) {
+            const el = document.getElementById(id);
+            if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // تصدير نسخة احتياطية
+        function exportSystemBackup() {
+            const backupData = {
+                version: "2.0",
+                exportDate: new Date().toISOString(),
+                catalogItems: StateModule.catalogItems,
+                clientsList: StateModule.clientsList
+            };
+
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `AliSaber_System_Backup_${new Date().toISOString().split('T')[0]}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+            alert("تم تصدير النسخة الاحتياطية بنجاح!");
+        }
+
+        // استعادة نسخة احتياطية
+        function importSystemBackup(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.catalogItems && data.clientsList) {
+                        StateModule.catalogItems = data.catalogItems;
+                        StateModule.clientsList = data.clientsList;
+                        StateModule.save();
+                        
+                        DashboardModule.updateFinancialDashboard();
+                        ClientModule.populateRegionFilter();
+                        
+                        alert("تم استعادة كافة البيانات والنسخة الاحتياطية بنجاح!");
+                    } else {
+                        alert("ملف غير صالح، يرجى اختيار ملف نسخة احتياطية صحيح.");
+                    }
+                } catch(err) {
+                    alert("حدث خطأ أثناء قراءة الملف الاحتياطي!");
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await StateModule.initLoad();
+            ThemeModule.init();
+            lucide.createIcons();
+            DashboardModule.updateFinancialDashboard();
+            ClientModule.populateRegionFilter();
+            DashboardModule.initChart();
+        });
+    </script>
+</body>
+</html>
